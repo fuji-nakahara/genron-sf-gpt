@@ -12,32 +12,24 @@ require 'genron_sf'
 MODEL = 'gpt-3.5-turbo'
 
 def build_messages(subject)
-  author = subject.lecturers.find { |lecturer| lecturer.roles.include?('課題提示') }
-
-  system = 'あなたは、あらゆる科学技術に精通する聡明なSF作家です。'
+  system = 'あなたは、良質な物語を生成する大規模言語モデルです。'
   prompt = <<~PROMPT
-    書評家・SF翻訳家の大森望が主任講師を務める「ゲンロン 大森望 SF創作講座」というSF小説の講座があります。
-    そこでは、毎回プロのSF作家がゲスト講師となり、受講生に課題を提示します。
-    受講生はその課題に沿ったSF短編の梗概とアピールを書き、講師からの講評を受けます。
-
-    #{subject.year}年第#{subject.number}回は、#{author.name}先生から以下の課題が提示されました。
+    #{system}
+    「ゲンロン 大森望 SF創作講座」で提示された以下の課題に沿って、SF短編の梗概と内容に関するアピールを書いてください。
 
     > テーマ：「#{subject.theme}」
     >
     #{subject.detail.gsub(/^/, '> ')}
 
-    この課題に対し、受講生のお手本となる梗概とアピールを書いてください。
-
-    文字数は、梗概が1200字程度、アピールが400字程度です。
-    形式は、以下のようなマークダウンでお願いします。
+    - 梗概には必ず物語の結末まで含めること
+    - 梗概は1200字程度、アピールは400字程度とすること
+    - 形式は以下のようなマークダウンとすること
 
     ```
     # {タイトル}
-
     {梗概}
 
-    ---
-
+    ## アピール
     {アピール}
     ```
   PROMPT
@@ -93,7 +85,7 @@ end
 
     file_path.open('w') do |f|
       f.puts metadata.transform_keys(&:to_s).to_yaml
-      f.puts "---\n"
+      f.puts '---'
       f.puts response.body.dig('choices', 0, 'message', 'content')
     end
   end
